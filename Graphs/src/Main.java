@@ -98,5 +98,4 @@ public class Main extends JFrame {
             imageLabel.setSize(getSize());
         } catch (Exception ignored) {}
     }
-
 }
