@@ -75,11 +75,11 @@ public class Main extends JFrame {
             if (positionX < 0) positionX = 0;*/
 
             graphics2D.setColor(Color.RED);
-            graphics2D.fill(new Ellipse2D.Double(base.getWidth() - (int) positionX - 5, base.getHeight() - (int) positionY - 5, 10, 10));
-            graphics2D.drawString(currentIndex + "", base.getWidth() - (int) positionX - 5, base.getHeight() - (int) positionY - 5);
+            graphics2D.fill(new Ellipse2D.Double((int) positionX - 5, (int) positionY - 5, 10, 10));
+            graphics2D.drawString((currentIndex + 1) + "", (int) positionX - 5, (int) positionY - 5);
 
             graphics2D.setColor(Color.BLACK);
-            graphics2D.drawLine(base.getWidth() - (int) lastPositionX, base.getHeight() - (int) lastPositionY, base.getWidth() - (int) positionX,base.getHeight() - (int) positionY);
+            graphics2D.drawLine((int) lastPositionX, (int) lastPositionY, (int) positionX,(int) positionY);
 
             lastPositionX = positionX;
             lastPositionY = positionY;
@@ -87,8 +87,8 @@ public class Main extends JFrame {
         }
 
         graphics2D.setColor(Color.RED);
-        graphics2D.drawString("Highest Value:" + highestValue, graphics2D.getFontMetrics().stringWidth("Highest Value:" + highestValue), graphics2D.getFontMetrics().getHeight());
-        graphics2D.drawString("Last Index: " + currentIndex, graphics2D.getFontMetrics().stringWidth("Last Index: " + currentIndex), (graphics2D.getFontMetrics().getHeight() * 2));
+        graphics2D.drawString("Highest Value: " + highestValue, 0, graphics2D.getFontMetrics().getHeight());
+        graphics2D.drawString("Last Index: " + currentIndex, 0, (graphics2D.getFontMetrics().getHeight() * 2));
 
         graphics2D.dispose();
         try {
