@@ -1,5 +1,6 @@
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.io.File;
 
 public class Main {
@@ -31,6 +32,13 @@ public class Main {
                 if (bufferedImage.getWidth() < 256 || bufferedImage.getHeight() < 256) {
                     file.delete();
                     System.out.println("Deleted " + file.getName() + " Width: " + bufferedImage.getWidth() + ", Height: " + bufferedImage.getHeight());
+                } else {
+                    Raster ras = bufferedImage.getRaster();
+
+                    if (ras.getNumDataElements() != 3) {
+                        file.delete();
+                        System.out.println("Deleted " + file.getName() + " cause its not a 3 channel image instead its a " + ras.getNumDataElements() + " channel image");
+                    }
                 }
             } catch (Exception exception) {
                 file.delete();
