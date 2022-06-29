@@ -58,7 +58,7 @@ public class Main extends JFrame {
 
         Graphics2D graphics2D = base.createGraphics();
 
-        graphics2D.setColor(Color.WHITE);
+        graphics2D.setColor(Color.BLACK);
         graphics2D.fillRect(0, 0, base.getWidth(), base.getHeight());
 
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -74,11 +74,11 @@ public class Main extends JFrame {
 
             if (positionX < 0) positionX = 0;*/
 
-            graphics2D.setColor(Color.RED);
+            graphics2D.setColor(Color.GRAY);
             graphics2D.fill(new Ellipse2D.Double((int) positionX - 5, (int) positionY - 5, 10, 10));
             graphics2D.drawString((currentIndex + 1) + "", (int) positionX - 5, (int) positionY - 5);
 
-            graphics2D.setColor(Color.BLACK);
+            graphics2D.setColor(Color.GRAY);
             graphics2D.drawLine((int) lastPositionX, (int) lastPositionY, (int) positionX,(int) positionY);
 
             lastPositionX = positionX;
@@ -86,7 +86,7 @@ public class Main extends JFrame {
             currentIndex++;
         }
 
-        graphics2D.setColor(Color.RED);
+        graphics2D.setColor(Color.GRAY);
         graphics2D.drawString("Highest Value: " + highestValue, 0, graphics2D.getFontMetrics().getHeight());
         graphics2D.drawString("Last Index: " + currentIndex, 0, (graphics2D.getFontMetrics().getHeight() * 2));
 
