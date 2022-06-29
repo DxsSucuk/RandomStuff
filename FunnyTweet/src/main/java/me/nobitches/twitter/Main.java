@@ -1,3 +1,5 @@
+package me.nobitches.twitter;
+
 import twitter4j.*;
 
 import java.nio.file.Files;
