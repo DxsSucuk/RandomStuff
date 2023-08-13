@@ -21,8 +21,8 @@ public class ModpackUpdater {
     static List<Integer> removeMods = List.of(585546, 847414, 825617);
     static List<String> deleteFiles = List.of("serverbrowser.json", "bhmenu-client.toml", "multi.txt", "server.txt", "lps.png", "studio.png", "modpack-update-checker-info.txt", "modpack-update-checker.txt");
     static List<Integer> missingMods = List.of(283644, 431725, 322896, 401955, 271740, 457570, 443915,
-            318646, 351725, 282001, 416089, 316867, 289479, 501214, 654384, 666014, 258371, 549225, 825621, 836992,
-            266707, 545686, 419699, 625321);
+            318646, 351725, 282001, 416089, 316867, 289479, 501214, 654384, 666014, 258371, 549225, 825621,
+            266707, 545686, 419699, 625321, 873263);
     static Map<Integer, Integer> forcedUpdateMods = /*Map.of(711216,4576641, 412082,4615838)*/ Map.of();
 
     private static final String currentCustomVersion = "v9";
@@ -64,6 +64,7 @@ public class ModpackUpdater {
                 new File(customDir, "modlist.html").delete();
                 System.out.println("Deleted modlist.html");
 
+                System.out.println("Starting to detox the modpack");
                 detoxModList(manifest);
                 System.out.println("Detoxed the Modlist.");
 
@@ -283,7 +284,7 @@ public class ModpackUpdater {
 
                                 newJsonArray.add(object);
 
-                                System.out.println("Added missing mod " + missingMod);
+                                System.out.println("Added missing mod " + missingMod + " (" + c.name() + ")");
                             });
                         } catch (CurseForgeException e) {
                             e.printStackTrace();
