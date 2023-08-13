@@ -37,7 +37,8 @@ build/
 ### Mac OS ###
 .DS_Store
 ModPacks/Custom
-ModPacks/BMC-Latest.zip
+ModPacks/Custom.zip
+ModPacks/LatestBMC.zip
 target/
 *.mf
 .idea/
