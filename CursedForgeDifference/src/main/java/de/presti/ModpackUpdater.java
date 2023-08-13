@@ -23,16 +23,22 @@ public class ModpackUpdater {
     static List<Integer> missingMods = List.of(283644, 431725, 322896, 401955, 271740, 457570, 443915,
             318646, 351725, 282001, 416089, 316867, 289479, 501214, 654384, 666014, 258371, 549225, 825621, 836992,
             266707, 545686, 419699, 625321);
-    static Map<Integer, Integer> forcedUpdateMods = Map.of(711216,4576641, 412082,4615838);
+    static Map<Integer, Integer> forcedUpdateMods = /*Map.of(711216,4576641, 412082,4615838)*/ Map.of();
+
+    private static final String currentCustomVersion = "v9";
 
     public static void updateModpack() throws CurseForgeException {
 
         Main.cfApi.getHelper().getMod(550864).ifPresent(c -> {
             try {
                 Path filePath = Path.of("ModPacks", "LatestBMC.zip");
+                Path endZip = Path.of("ModPacks", "Custom.zip");
 
                 if (filePath.toFile().exists())
                     Files.delete(filePath);
+
+                if (endZip.toFile().exists())
+                    Files.delete(endZip);
 
                 List<io.github.matyrobbrt.curseforgeapi.schemas.file.File> files = c.latestFiles();
                 io.github.matyrobbrt.curseforgeapi.schemas.file.File file = files.get(files.size() - 1);
@@ -41,9 +47,9 @@ public class ModpackUpdater {
 
                 file.download(filePath);
 
-                String bmcVersion = file.displayName().replace("Better MC [FORGE] 1.19.2", "").trim(), customVersion = "v8";
+                String bmcVersion = file.displayName().replace("Better MC [FORGE] 1.19.2", "").trim();
                 System.out.println("BMC Version: " + bmcVersion);
-                System.out.println("Custom Version: " + customVersion);
+                System.out.println("Custom Version: " + currentCustomVersion);
 
                 File customDir = new File("ModPacks", "Custom");
 
@@ -63,7 +69,7 @@ public class ModpackUpdater {
 
                 File configDir = new File(customDir, "overrides/config"), defaultConfigDir = new File(customDir, "overrides/defaultconfigs");
 
-                replaceStringsInFiles(manifest, bmcVersion, customVersion);
+                replaceStringsInFiles(manifest, bmcVersion, currentCustomVersion);
                 System.out.println("Replaced strings in manifest.json");
 
                 detoxFiles(configDir);
@@ -72,10 +78,10 @@ public class ModpackUpdater {
                 detoxFiles(defaultConfigDir);
                 System.out.println("Detoxed the default config files");
 
-                replaceStringsInFiles(configDir, bmcVersion, customVersion);
+                replaceStringsInFiles(configDir, bmcVersion, currentCustomVersion);
                 System.out.println("Replaced strings in config files");
 
-                replaceStringsInFiles(defaultConfigDir, bmcVersion, customVersion);
+                replaceStringsInFiles(defaultConfigDir, bmcVersion, currentCustomVersion);
                 System.out.println("Replaced strings in default config files");
 
                 File presetFiles = new File("ModPacks", "presets");
@@ -97,11 +103,16 @@ public class ModpackUpdater {
                 System.out.println("Loaded resource pack presets");
 
                 System.out.println("Finished updating the modpack");
+
+                System.out.println("Starting to zip the modpack");
+                new ZipFiles().zipDirectory(customDir, endZip.toFile());
+                System.out.println("Finished zipping the modpack");
             } catch (Exception e) {
                 e.printStackTrace();
                 try {
                     Files.delete(Path.of("ModPacks", "LatestBMC.zip"));
                     deleteFolder(Path.of("ModPacks", "Custom").toFile());
+                    Files.delete(Path.of("ModPacks", "Custom.zip"));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -165,12 +176,14 @@ public class ModpackUpdater {
         if (file.isFile()) {
             System.out.println("Replacing strings in file " + name);
             String readAll = Files.readString(file.toPath());
-            readAll = readAll.replace("Better MC [FORGE] 1.19.2", "Pockets Dimensional Craft")
-                    .replace("Better Minecraft [FORGE] 1.19.2", "Pockets Dimensional Craft [Forge] 1.19.2")
+            readAll = readAll.replace("Better MC [FORGE]", "Pockets Dimensional Craft")
                     .replace(bmc, custom)
-                    .replace("BMC", "PDC")
+                    .replace("SHXRKIE", "Presti")
                     .replace("Better Minecraft", "Pockets Dimensional Craft")
+                    .replace("BMC3", "PDC")
+                    .replace("BMC", "PDC")
                     .replace("BetterMC", "PocketsDC")
+                    .replace("Better MC", "Pockets Dimensional Craft")
                     .replace("574291", "839945")
                     .replace("1010281625583628319", "1129972955322007646");
             Files.writeString(file.toPath(), readAll, StandardOpenOption.TRUNCATE_EXISTING);
@@ -187,6 +200,28 @@ public class ModpackUpdater {
     public static void detoxModList(File file) throws IOException, CurseForgeException {
         if (file.isFile() && file.getName().equalsIgnoreCase("manifest.json")) {
             JsonObject jsonObject = JsonParser.parseString(Files.readString(file.toPath())).getAsJsonObject();
+
+            // TODO:: remove once BMC3 updates to newer forge.
+            if (jsonObject.has("minecraft")) {
+                JsonObject minecraft = jsonObject.getAsJsonObject("minecraft");
+
+                if (minecraft.has("modLoaders")) {
+                    JsonArray modLoaders = minecraft.getAsJsonArray("modLoaders");
+                    JsonArray newArray = new JsonArray();
+
+                    JsonObject forgeObject = modLoaders.get(0).getAsJsonObject();
+                    forgeObject.addProperty("id", "forge-43.2.21");
+
+                    newArray.add(forgeObject);
+
+                    minecraft.remove("modLoaders");
+                    minecraft.add("modLoaders", modLoaders);
+                }
+
+                jsonObject.remove("minecraft");
+                jsonObject.add("minecraft", minecraft);
+            }
+
             if (jsonObject.has("files")) {
                 JsonArray jsonArray = jsonObject.getAsJsonArray("files");
                 JsonArray newJsonArray = new JsonArray();
@@ -194,13 +229,34 @@ public class ModpackUpdater {
                 for (int i = 0; i < jsonArray.size(); i++) {
                     JsonObject object = jsonArray.get(i).getAsJsonObject();
                     int projectId = object.get("projectID").getAsInt();
-                    if (forcedUpdateMods.containsKey(projectId)) {
-                        object.addProperty("fileID", forcedUpdateMods.get(projectId));
-                        System.out.println("Forced update mod " + projectId + " to file " + forcedUpdateMods.get(projectId));
-                    }
 
-                    if (!removeMods.contains(projectId)) {
+                    if (removeMods.contains(projectId)) continue;
+
+                    int fileId = object.get("fileID").getAsInt();
+
+                    io.github.matyrobbrt.curseforgeapi.schemas.file.File modFile =
+                            Main.cfApi.getHelper().getModFile(projectId, fileId).orElse(null);
+
+                    if (modFile != null && modFile.isAvailable()) {
                         newJsonArray.add(object);
+                    } else  {
+                        System.out.println("Mod file for " + projectId + " is not available, trying to use the latest.");
+                        Main.cfApi.getHelper().getModFiles(projectId).ifPresent(mf -> {
+                            List<io.github.matyrobbrt.curseforgeapi.schemas.file.File> files =
+                                    mf.stream().filter(file1 -> !file1.isServerPack() &&
+                                            file1.gameVersions().contains("1.19.2") && file1.gameVersions().contains("Forge")).toList();
+
+                            if (files.isEmpty()) {
+                                System.out.println("Couldn't find a file for mod " + projectId);
+                                return;
+                            }
+
+                            object.addProperty("fileID", files.get(0).id());
+
+                            newJsonArray.add(object);
+
+                            System.out.println("Updated mod " + projectId);
+                        });
                     }
                 }
 

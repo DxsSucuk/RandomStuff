@@ -45,7 +45,7 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        Main.cfApi.getHelper().getMod(839945).ifPresent(c -> {
+        /*Main.cfApi.getHelper().getMod(839945).ifPresent(c -> {
             try {
                 Main.cfApi.getHelper().getModFiles(c).orElseGet(ArrayList::new).forEach(x -> {
                     System.out.println(x.displayName() + " - " + x.serverPackFileId());
@@ -58,9 +58,9 @@ public class Main {
             } catch (CurseForgeException e) {
                 throw new RuntimeException(e);
             }
-        });
+        }); */
 
-        //// ModpackUpdater.updateModpack();
+        ModpackUpdater.updateModpack();
 
         /*differJSONBased();
         System.out.println("--------------------------------------------------");*/
