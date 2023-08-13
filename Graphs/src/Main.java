@@ -40,6 +40,7 @@ public class Main extends JFrame {
 
     public static void main(String[] args) {
         new Main();
+        System.out.println("Started");
     }
 
     public void updateData() {
@@ -51,8 +52,8 @@ public class Main extends JFrame {
 
         BufferedImage base = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
 
-        double xOffset = (double) base.getWidth() / values.entrySet().stream().filter(value -> ((System.currentTimeMillis() - value.getValue()) <= Duration.ofSeconds(10).toMillis())).count();
-        double yOffset = (base.getHeight() - 10) / (highestValue == 0 ? 1 : highestValue);
+        double xOffset = (double) (base.getWidth() - 40) / values.entrySet().stream().filter(value -> ((System.currentTimeMillis() - value.getValue()) <= Duration.ofSeconds(10).toMillis())).count();
+        double yOffset = (base.getHeight() - 20) / (highestValue == 0 ? 1 : highestValue);
 
         System.out.println(highestValue + " - " + xOffset + " - " + yOffset);
 
@@ -75,8 +76,8 @@ public class Main extends JFrame {
             if (positionX < 0) positionX = 0;*/
 
             graphics2D.setColor(Color.GRAY);
-            graphics2D.fill(new Ellipse2D.Double((int) positionX - 5, (int) positionY - 5, 10, 10));
-            graphics2D.drawString((currentIndex + 1) + "", (int) positionX - 5, (int) positionY - 5);
+            graphics2D.fill(new Ellipse2D.Double(positionX - 5, positionY - 5, 10, 10));
+            graphics2D.drawString(String.valueOf(currentIndex + 1), (float) positionX - 5, (float) positionY - 5);
 
             graphics2D.setColor(Color.GRAY);
             graphics2D.drawLine((int) lastPositionX, (int) lastPositionY, (int) positionX,(int) positionY);
