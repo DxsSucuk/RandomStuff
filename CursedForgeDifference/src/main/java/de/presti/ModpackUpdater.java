@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -22,8 +23,10 @@ public class ModpackUpdater {
     static List<String> deleteFiles = List.of("serverbrowser.json", "bhmenu-client.toml", "multi.txt", "server.txt", "lps.png", "studio.png", "modpack-update-checker-info.txt", "modpack-update-checker.txt");
     static List<Integer> missingMods = List.of(283644, 431725, 322896, 401955, 271740, 457570, 443915,
             318646, 351725, 282001, 416089, 316867, 289479, 501214, 654384, 666014, 258371, 549225, 825621,
-            266707, 545686, 419699, 625321, 873263);
+            266707, 545686, 419699, 625321, 873263, 852987);
     static Map<Integer, Integer> forcedUpdateMods = /*Map.of(711216,4576641, 412082,4615838)*/ Map.of();
+
+    static List<Integer> currentMods = new ArrayList<>();
 
     private static final String currentCustomVersion = "v9";
 
@@ -233,6 +236,8 @@ public class ModpackUpdater {
 
                     if (removeMods.contains(projectId)) continue;
 
+                    if (currentMods.contains(projectId)) continue;
+
                     int fileId = object.get("fileID").getAsInt();
 
                     io.github.matyrobbrt.curseforgeapi.schemas.file.File modFile =
@@ -240,6 +245,7 @@ public class ModpackUpdater {
 
                     if (modFile != null && modFile.isAvailable()) {
                         newJsonArray.add(object);
+                        currentMods.add(projectId);
                     } else  {
                         System.out.println("Mod file for " + projectId + " is not available, trying to use the latest.");
                         Main.cfApi.getHelper().getModFiles(projectId).ifPresent(mf -> {
@@ -255,13 +261,13 @@ public class ModpackUpdater {
                             object.addProperty("fileID", files.get(0).id());
 
                             newJsonArray.add(object);
-
+                            currentMods.add(projectId);
                             System.out.println("Updated mod " + projectId);
                         });
                     }
                 }
 
-                for (int missingMod : missingMods) {
+                for (int missingMod : missingMods.stream().filter(missingMod -> !currentMods.contains(missingMod)).toList()) {
                     JsonObject object = new JsonObject();
 
                     System.out.println("Trying to add missing mod " + missingMod);
@@ -283,6 +289,7 @@ public class ModpackUpdater {
                                 object.addProperty("fileID", files.get(0).id());
 
                                 newJsonArray.add(object);
+                                currentMods.add(missingMod);
 
                                 System.out.println("Added missing mod " + missingMod + " (" + c.name() + ")");
                             });
