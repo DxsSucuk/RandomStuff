@@ -28,7 +28,7 @@ public class ModpackUpdater {
 
     static List<Integer> currentMods = new ArrayList<>();
 
-    private static final String currentCustomVersion = "v9";
+    private static final String currentCustomVersion = "v10";
 
     public static void updateModpack() throws CurseForgeException {
 
