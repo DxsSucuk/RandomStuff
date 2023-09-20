@@ -9,11 +9,6 @@ customization-meta {
 }
 
 customization {
-  name = betterminecraftpanorama
-  action = setbackgroundpanorama
-}
-
-customization {
   keepaspectratio = false
   action = backgroundoptions
 }
@@ -246,21 +241,6 @@ customization {
   actionid = d9c9e9cc-3e5a-49e1-922f-8ad01bf955f81660932344539
   y = -115
   height = 75
-}
-
-customization {
-  orientation = bottom-left
-  loopbackgroundanimations = true
-  restartbackgroundanimations = true
-  buttonaction = openlink;https://github.com/LunaPixelStudios/Better-MC/wiki/Performance-Guide%btnaction_splitter_fm%
-  x = 3
-  width = 107
-  action = addbutton
-  actionid = 304b989b-f2eb-4ced-9bd1-7c2329498f441674444787459
-  y = -23
-  description = Improve your FPS!
-  label = Performance Guide!
-  height = 20
 }
 
 customization {

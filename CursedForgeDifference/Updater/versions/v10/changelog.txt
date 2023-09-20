@@ -1,2 +1,3 @@
-+ Added Replay Mod for Forge Reborn
-+ Updated some Mods.
++ Added more gun and vehicle stuff dunno.
+= Updated some Mods.
+- Removed content from the base version.
