@@ -56,7 +56,7 @@ public class Main {
             }
         }); */
 
-        OldModpackUpdater.updateModpack();
+        NewModpackUpdater.updateModpack();
 
         /*differJSONBased();
         System.out.println("--------------------------------------------------");*/

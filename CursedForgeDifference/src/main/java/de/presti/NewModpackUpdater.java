@@ -6,24 +6,19 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
-public class OldModpackUpdater {
-    static List<String> deleteFiles = List.of("serverbrowser.json", "bhmenu-client.toml", "multi.txt", "server.txt", "lps.png", "studio.png", "mojang.png", "luna_screen.txt");
-    static List<String> deleteFolders = List.of("modpack-update-checker", "bettermcslideshow", "betterminecraftpanorama");
+public class NewModpackUpdater {
+
     static List<Integer> currentMods = new ArrayList<>();
 
     public static void updateModpack() throws CurseForgeException {
-
         Main.cfApi.getHelper().getMod(550864).ifPresent(c -> {
             try {
                 Path filePath = Path.of("ModPacks", "LatestBMC.zip");
@@ -63,37 +58,27 @@ public class OldModpackUpdater {
                 detoxModList(manifest);
                 System.out.println("Detoxed the Modlist.");
 
+                File presetFiles = new File("ModPacks", "newPresets");
                 File configDir = new File(customDir, "overrides/config"), defaultConfigDir = new File(customDir, "overrides/defaultconfigs");
+                File configPresetFiles = new File(presetFiles, "config");
+
+                File resourcePackDir = new File(customDir, "overrides/resourcepacks");
+                File resourcePresetFiles = new File(presetFiles, "resourcepacks");
+
+                System.out.println("Deleting all folders.");
+                FileUtil.deleteFolder(configDir);
+                FileUtil.deleteFolder(defaultConfigDir);
+                FileUtil.deleteFolder(resourcePackDir);
+                System.out.println("Deleted all folders.");
 
                 FileUtil.replaceStringsInFiles(manifest, bmcVersion, ModPackInfo.currentCustomVersion);
                 System.out.println("Replaced strings in manifest.json");
-
-                detoxFiles(configDir);
-                System.out.println("Detoxed the config files");
-
-                detoxFiles(defaultConfigDir);
-                System.out.println("Detoxed the default config files");
-
-                FileUtil.replaceStringsInFiles(configDir, bmcVersion, ModPackInfo.currentCustomVersion);
-                System.out.println("Replaced strings in config files");
-
-                FileUtil.replaceStringsInFiles(defaultConfigDir, bmcVersion, ModPackInfo.currentCustomVersion);
-                System.out.println("Replaced strings in default config files");
-
-                File presetFiles = new File("ModPacks", "presets");
-                File configPresetFiles = new File(presetFiles, "config");
 
                 FileUtil.loadPresets(configPresetFiles, configDir);
                 System.out.println("Loaded config presets");
 
                 FileUtil.loadPresets(configPresetFiles, defaultConfigDir);
                 System.out.println("Loaded default config presets");
-
-                File resourcePackDir = new File(customDir, "overrides/resourcepacks");
-                File resourcePresetFiles = new File(presetFiles, "resourcepacks");
-
-                detoxFiles(resourcePackDir);
-                System.out.println("Detoxed the resource packs");
 
                 FileUtil.loadPresets(resourcePresetFiles, resourcePackDir);
                 System.out.println("Loaded resource pack presets");
@@ -119,27 +104,6 @@ public class OldModpackUpdater {
     public static void detoxModList(File file) throws IOException, CurseForgeException {
         if (file.isFile() && file.getName().equalsIgnoreCase("manifest.json")) {
             JsonObject jsonObject = JsonParser.parseString(Files.readString(file.toPath())).getAsJsonObject();
-
-            // TODO:: remove once BMC3 updates to newer forge. DONE
-            /*if (jsonObject.has("minecraft")) {
-                JsonObject minecraft = jsonObject.getAsJsonObject("minecraft");
-
-                if (minecraft.has("modLoaders")) {
-                    JsonArray modLoaders = minecraft.getAsJsonArray("modLoaders");
-                    JsonArray newArray = new JsonArray();
-
-                    JsonObject forgeObject = modLoaders.get(0).getAsJsonObject();
-                    forgeObject.addProperty("id", "forge-43.2.21");
-
-                    newArray.add(forgeObject);
-
-                    minecraft.remove("modLoaders");
-                    minecraft.add("modLoaders", modLoaders);
-                }
-
-                jsonObject.remove("minecraft");
-                jsonObject.add("minecraft", minecraft);
-            }*/
 
             if (jsonObject.has("files")) {
                 JsonArray jsonArray = jsonObject.getAsJsonArray("files");
@@ -222,22 +186,4 @@ public class OldModpackUpdater {
         }
     }
 
-    public static void detoxFiles(File file) {
-        if (file.isDirectory()) {
-            if (deleteFolders.contains(file.getName())) {
-                FileUtil.deleteFolder(file);
-                return;
-            }
-
-            for (File f : file.listFiles()) {
-                detoxFiles(f);
-            }
-        } else {
-            if (deleteFiles.contains(file.getName())) {
-                if (!file.delete()) {
-                    System.out.println("Couldn't delete file " + file.getName());
-                }
-            }
-        }
-    }
 }
