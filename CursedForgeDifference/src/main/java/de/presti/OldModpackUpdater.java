@@ -17,13 +17,14 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class ModpackUpdater {
+public class OldModpackUpdater {
 
-    static List<Integer> removeMods = List.of(585546, 847414, 825617);
-    static List<String> deleteFiles = List.of("serverbrowser.json", "bhmenu-client.toml", "multi.txt", "server.txt", "lps.png", "studio.png", "modpack-update-checker-info.txt", "modpack-update-checker.txt");
+    static List<Integer> removeMods = List.of(585546, 847414, 825617, 880620, 847414);
+    static List<String> deleteFiles = List.of("serverbrowser.json", "bhmenu-client.toml", "multi.txt", "server.txt", "lps.png", "studio.png", "mojang.png", "luna_screen.txt");
+    static List<String> deleteFolders = List.of("modpack-update-checker", "bettermcslideshow", "betterminecraftpanorama");
     static List<Integer> missingMods = List.of(283644, 431725, 322896, 401955, 271740, 457570, 443915,
             318646, 351725, 282001, 416089, 316867, 289479, 501214, 654384, 666014, 258371, 549225, 825621,
-            266707, 545686, 419699, 625321, 873263, 683122, 658286, 848381);
+            266707, 545686, 419699, 625321, 683122, 658286, 848381);
     static Map<Integer, Integer> forcedUpdateMods = /*Map.of(711216,4576641, 412082,4615838)*/ Map.of();
 
     static List<Integer> currentMods = new ArrayList<>();
@@ -50,16 +51,16 @@ public class ModpackUpdater {
 
                 file.download(filePath);
 
-                String bmcVersion = file.displayName().replace("Better MC [FORGE] 1.19.2", "").trim();
+                String bmcVersion = file.displayName().replace("Better MC [FORGE] - 1.19.2 ", "").trim();
                 System.out.println("BMC Version: " + bmcVersion);
                 System.out.println("Custom Version: " + currentCustomVersion);
 
                 File customDir = new File("ModPacks", "Custom");
 
                 if (customDir.exists() && customDir.isDirectory())
-                    deleteFolder(customDir);
+                    FileUtil.deleteFolder(customDir);
 
-                unzip(filePath, customDir);
+                ZipFiles.unzip(filePath, customDir);
                 System.out.println("Unzipped BMC");
 
                 File manifest = new File(customDir, "manifest.json");
@@ -115,58 +116,13 @@ public class ModpackUpdater {
                 e.printStackTrace();
                 try {
                     Files.delete(Path.of("ModPacks", "LatestBMC.zip"));
-                    deleteFolder(Path.of("ModPacks", "Custom").toFile());
+                    FileUtil.deleteFolder(Path.of("ModPacks", "Custom").toFile());
                     Files.delete(Path.of("ModPacks", "Custom.zip"));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
         });
-    }
-
-    public static void unzip(Path src, File destDir) throws IOException {
-        byte[] buffer = new byte[1024];
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(src.toFile()));
-        ZipEntry zipEntry = zis.getNextEntry();
-        while (zipEntry != null) {
-            File newFile = newFile(destDir, zipEntry);
-            if (zipEntry.isDirectory()) {
-                if (!newFile.isDirectory() && !newFile.mkdirs()) {
-                    throw new IOException("Failed to create directory " + newFile);
-                }
-            } else {
-                // fix for Windows-created archives
-                File parent = newFile.getParentFile();
-                if (!parent.isDirectory() && !parent.mkdirs()) {
-                    throw new IOException("Failed to create directory " + parent);
-                }
-
-                // write file content
-                FileOutputStream fos = new FileOutputStream(newFile);
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                }
-                fos.close();
-            }
-            zipEntry = zis.getNextEntry();
-        }
-
-        zis.closeEntry();
-        zis.close();
-    }
-
-    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-        File destFile = new File(destinationDir, zipEntry.getName());
-
-        String destDirPath = destinationDir.getCanonicalPath();
-        String destFilePath = destFile.getCanonicalPath();
-
-        if (!destFilePath.startsWith(destDirPath + File.separator)) {
-            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-        }
-
-        return destFile;
     }
 
     public static void replaceStringsInFiles(File file, String bmc, String custom) throws IOException {
@@ -309,12 +265,19 @@ public class ModpackUpdater {
 
     public static void detoxFiles(File file) {
         if (file.isDirectory()) {
+            if (deleteFolders.contains(file.getName())) {
+                FileUtil.deleteFolder(file);
+                return;
+            }
+
             for (File f : file.listFiles()) {
                 detoxFiles(f);
             }
         } else {
             if (deleteFiles.contains(file.getName())) {
-                file.delete();
+                if (!file.delete()) {
+                    System.out.println("Couldn't delete file " + file.getName());
+                }
             }
         }
     }
@@ -324,32 +287,6 @@ public class ModpackUpdater {
             new File(directory, presets.getName()).delete();
         }
 
-        copyDirectory(presets, directory);
-    }
-
-    public static void copyDirectory(File baseDirectory, File destDirectory) throws IOException {
-        if (baseDirectory.isDirectory()) {
-            for (File file : baseDirectory.listFiles()) {
-                String toPath = file.toPath().toString().replace(baseDirectory.toPath().toString(), "");
-
-                copyDirectory(file, new File(destDirectory, toPath));
-            }
-        } else {
-            copyFile(baseDirectory, destDirectory);
-        }
-    }
-
-    public static void copyFile(File baseFile, File destFile) throws IOException {
-        Files.copy(baseFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    public static void deleteFolder(File file) {
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                deleteFolder(f);
-            }
-        }
-
-        file.delete();
+        FileUtil.copyDirectory(presets, directory);
     }
 }

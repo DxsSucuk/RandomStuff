@@ -10,11 +10,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
 
 
 public class Main {
@@ -40,7 +36,7 @@ public class Main {
         }*/
 
         try {
-            cfApi = CurseForgeAPI.builder().apiKey("$2a$10$gzUPDxpHN0qcocF6aldjfuB5NgXOO2l8cAqi3.fNp1cXu4fS0wnIG").build();
+            cfApi = CurseForgeAPI.builder().apiKey(args[0]).build();
         } catch (LoginException e) {
             throw new RuntimeException(e);
         }
@@ -60,7 +56,7 @@ public class Main {
             }
         }); */
 
-        ModpackUpdater.updateModpack();
+        OldModpackUpdater.updateModpack();
 
         /*differJSONBased();
         System.out.println("--------------------------------------------------");*/
