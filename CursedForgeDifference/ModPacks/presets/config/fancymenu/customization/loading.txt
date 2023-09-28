@@ -53,14 +53,3 @@ customization {
   y = 375
   height = 10
 }
-
-customization {
-  path = resourcepacks/Graphics/mojang.png
-  orientation = mid-centered
-  x = -213
-  width = 426
-  action = addtexture
-  actionid = d7f52b4a-5790-4d88-a861-6c308089f1c91685801174898
-  y = -50
-  height = 100
-}
