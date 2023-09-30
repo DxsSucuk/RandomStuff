@@ -1,6 +1,0 @@
-Update to base version v17
-
-+ Added Laendli Transport
-+ Added Pocket Money
-+ Added Minecraft Transit Railway
-+ Added The Tube
